@@ -1,6 +1,6 @@
 name: calculator
 description: A simple calculator to showcase various programming concepts.
-version: 1.0.0
+version: 0.0.1
 
 publish_to: none
 

@@ -7,6 +7,7 @@ void main() {
     test('should not allow invalid characters as input', () {
       expect(() => calculator.compute('@ + 10'), throwsArgumentError);
       expect(() => calculator.compute('abcd'), throwsArgumentError);
+      expect(() => calculator.compute('.'), throwsArgumentError);
       expect(() => calculator.compute(''), throwsArgumentError);
     });
 

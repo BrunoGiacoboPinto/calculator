@@ -9,10 +9,18 @@ abstract class Calculator {
 class _CalculatorImpl extends Calculator {
   _CalculatorImpl() : super._();
 
-  static final alphabet = '+-/*0123456789'.codeUnits;
+  static final alphabet = '+-/*0123456789()'.codeUnits;
+  static final closeParentesis = ')'.codeUnits[0];
+  static final openParentesis = '('.codeUnits[0];
 
   bool isInValidInput(String expression) {
     return expression.codeUnits.any((character) => !alphabet.contains(character)) || expression.isEmpty;
+  }
+
+  bool hasBalancedParentesis(String expression) {
+    final closeParentesisCount = expression.codeUnits.where((character) => character == closeParentesis).length;
+    final openParentesisCount = expression.codeUnits.where((character) => character == openParentesis).length;
+    return closeParentesisCount == openParentesisCount;
   }
 
   _Expression? _parse(String expression) {
@@ -21,11 +29,16 @@ class _CalculatorImpl extends Calculator {
 
   @override
   int compute(String expression) {
-    if (isInValidInput(expression.trim())) {
+    final cleanExpression = expression.replaceAll(' ', ''); 
+    if (isInValidInput(cleanExpression)) {
       throw ArgumentError();
     }
 
-    final tree = _parse(expression);
+    if (!hasBalancedParentesis(cleanExpression)) {
+      throw StateError('$expression does not have balanced parentesis');
+    }
+
+    final tree = _parse(cleanExpression);
 
     return tree == null //
         ? throw StateError('$expression is not a valid expression')

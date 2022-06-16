@@ -22,11 +22,13 @@ A implementação deverá atender aos seguintes critérios:
 
 6. A implementação deverá suportar parênteses balanceados. Ou seja, se houver a abertura de um parêntese para alteração de precedência, um outro deverá estar presente para caracterizar o fechamento da alteração de precedência. Exemplo de expressão inválida: ```1 + 4) / (6 -1```;
 
-7. Os únicos caracteres que constituem uma expressão aritmética válida são: `0,1,2,3,4,5,6,7,8,9,+,-,/,*,(,)` e qualquer variação numérica que represente um `double` válido na sintaxe da linguagem Dart. Valores fracinários, no entanto não poderão passar de 5 números após a vírgula;
+7. Os únicos caracteres que constituem uma expressão aritmética válida são: `0,1,2,3,4,5,6,7,8,9,+,-,/,*,(,)` e qualquer variação numérica que represente um `double` válido na sintaxe da linguagem Dart. Valores fracinários, no entanto não poderão passar de 5 números após a vírgula. Para fins de discussão, o conjunto de caracteres válido será chamado de alfabeto;
 
 8. A solução apresentada deverá ser o "mais orientado a objetos possível", ou seja, usar o máximo possível de conceitos do paradigma de programação orientado a objetos que o Dart suportar;
 
 9. Para a segunda fase, erros de arredondamento serão tolerados, desde que seja observado o limite de 5 casas após a vírgula para números fracionários;
+
+10. Não é permitido o uso de nenhuma biblioteca além das bibliotecas padrão da linguagem Dart;
 
 ### Como participar do desafio
 

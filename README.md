@@ -4,7 +4,7 @@ Quão difícil é implementar uma calculador em Dart? Vamos descobrir!
 
 ## Desafio de programação
 
-Implemente uma calculadora capaz de suportar a mairoria das operações  aritméticas. A calculadora deve ser implementada em duas fases. Na primeira fase, devem ser suportados apneas números inteiros e as seguintes operações aritméticas: adição, subtração, multiplicação. Na última fase, a calculadora deverá dar suporte a números fracionários e a operações de exponenciação. Essa fase, no entanto, será considerada um bônus.
+Implemente uma calculadora capaz de suportar a mairoria das operações  aritméticas. A calculadora deve ser implementada em duas fases. Na primeira fase, devem ser suportados apneas números inteiros e as seguintes operações aritméticas: adição, subtração, multiplicação e divisão. Na última fase, a calculadora deverá dar suporte a números fracionários e a operações de exponenciação. Essa fase, no entanto, será considerada um bônus.
 
 ### Considerações gerais
 

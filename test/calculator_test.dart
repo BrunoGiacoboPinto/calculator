@@ -24,7 +24,9 @@ void main() {
     });
 
     test('should compute simple expression', () {
-      expect(calculator.compute('2+2'), 4);
+      expect(calculator.compute('400 + 400 * 2 / ( 1 - 5 )'), 4);
+      expect(calculator.compute('4 * 2 / ( 1 - 5 )'), 4);
+      expect(calculator.compute('4 * (2-1)'), 4);
     });
   });
 }

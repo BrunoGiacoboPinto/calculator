@@ -11,30 +11,30 @@ abstract class Calculator {
 class _CalculatorImpl extends Calculator {
   _CalculatorImpl() : super._();
 
-  static final alphabet = '+-/*0123456789().'.codeUnits;
-  static final closeParentesis = ')'.codeUnits[0];
-  static final openParentesis = '('.codeUnits[0];
-  static final operators = '+-/*';
+  static final kAlphabet = '+-/*0123456789().'.codeUnits;
+  static final kCloseParentesis = ')'.codeUnits[0];
+  static final kOpenParentesis = '('.codeUnits[0];
+  static final kOperators = '+-/*';
 
   // TODO(giacobo): put back support for negative numbers. Probably via peek ahead
-  static final numberRegex = RegExp(r'^(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
+  static final kNumberRegex = RegExp(r'^(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
 
   bool isInValidInput(String expression) {
-    return expression.codeUnits.any((character) => !alphabet.contains(character)) || expression.isEmpty;
+    return expression.codeUnits.any((character) => !kAlphabet.contains(character)) || expression.isEmpty;
   }
 
   bool hasBalancedParentesis(String expression) {
-    final closeParentesisCount = expression.codeUnits.where((character) => character == closeParentesis).length;
-    final openParentesisCount = expression.codeUnits.where((character) => character == openParentesis).length;
+    final closeParentesisCount = expression.codeUnits.where((character) => character == kCloseParentesis).length;
+    final openParentesisCount = expression.codeUnits.where((character) => character == kOpenParentesis).length;
     return closeParentesisCount == openParentesisCount;
   }
 
   bool isNumeric(String value) {
-    return numberRegex.hasMatch(value);
+    return kNumberRegex.hasMatch(value);
   }
 
   bool isOperateor(String value) {
-    return operators.contains(value);
+    return kOperators.contains(value);
   }
 
   List<_Token> tokenize(String expression) {
@@ -45,7 +45,7 @@ class _CalculatorImpl extends Calculator {
         tokens.add(_OpenBracketToken());
       } else if (expression[i] == ')') {
         tokens.add(_CloseBracketToken());
-      } else if (operators.contains(expression[i])) {
+      } else if (kOperators.contains(expression[i])) {
         tokens.add(_OperatorToken(expression[i]));
       } else if (isNumeric(expression[i])) {
         final number = StringBuffer();
@@ -72,14 +72,45 @@ class _CalculatorImpl extends Calculator {
 
   // For more info check: https://aquarchitect.github.io/swift-algorithm-club/Shunting%20Yard/
   _Expression? shuntingYard(String expression) {
+    final tree = Queue<_AritimeticExpression>();
+
+    void addExpressionToTree(_Token token, _Expression<int> left, _Expression<int> right) {
+      if (token is _OperatorToken) {
+        switch (token.value) {
+          case '+':
+            {
+              tree.addLast(_AdditionExpression(left, right));
+              break;
+            }
+          case '-':
+            {
+              tree.addLast(_SubtractionExpression(left, right));
+              break;
+            }
+          case '*':
+            {
+              tree.addLast(_MultiplicationExpression(left, right));
+              break;
+            }
+          case '/':
+            {
+              tree.addLast(_DivisionExpression(left, right));
+              break;
+            }
+        }
+      }
+    }
+
     final output = Queue<_Token>();
     final operators = Queue<_Token>();
+    final numbers = Queue<_NumericExpression>();
 
     final tokens = tokenize(expression);
 
     for (final token in tokens) {
       if (token is _NumberToken) {
         output.add(token);
+        numbers.add(_NumericExpression(token.value));
       } else if (token is _OpenBracketToken) {
         operators.addLast(token);
       } else if (token is _CloseBracketToken) {
@@ -87,10 +118,19 @@ class _CalculatorImpl extends Calculator {
           _Token operator = operators.removeLast();
           while (operator is! _OpenBracketToken) {
             output.add(operator);
-            operator = operators.removeLast();
+            _Expression<int> right, left;
+            if (numbers.length > 1) {
+              right = numbers.removeLast();
+              left = numbers.removeLast();
+            } else {
+              right = numbers.removeLast();
+              left = tree.removeLast();
+            }
+            addExpressionToTree(operator, left, right);
             if (operators.isEmpty) {
               break;
             }
+            operator = operators.removeLast();
           }
         }
       } else if (token is _OperatorToken) {
@@ -99,6 +139,15 @@ class _CalculatorImpl extends Calculator {
             if (token.precedence <= operator.precedence) {
               output.add(operator);
               operators.removeLast();
+              _Expression<int> right, left;
+              if (numbers.length > 1) {
+                right = numbers.removeLast();
+                left = numbers.removeLast();
+              } else {
+                right = numbers.removeLast();
+                left = tree.removeLast();
+              }
+              addExpressionToTree(operator, left, right);
             } else {
               break;
             }
@@ -114,7 +163,23 @@ class _CalculatorImpl extends Calculator {
     }
 
     while (operators.isNotEmpty) {
-      output.add(operators.removeLast());
+      final operator = operators.removeLast();
+      late _Expression<int> left, right;
+
+      if (operators.length.isEven) {
+        if (numbers.length > 1) {
+          right = numbers.removeLast();
+          left = numbers.removeLast();
+        } else {
+          right = numbers.removeLast();
+          left = tree.removeLast();
+        }
+      } else {
+        right = tree.removeLast();
+        left = tree.removeLast();
+      }
+
+      addExpressionToTree(operator, left, right);
     }
 
     // TODO(giacobo): remove this print and add logger
@@ -126,7 +191,7 @@ class _CalculatorImpl extends Calculator {
 
     print(shuntingYard);
 
-    return _SumExpression(_NumericExpression(2), _NumericExpression(2));
+    return tree.removeLast();
   }
 
   @override
@@ -143,7 +208,7 @@ class _CalculatorImpl extends Calculator {
     final tree = shuntingYard(cleanExpression);
 
     return tree == null //
-        ? throw StateError('$expression is not a valid expression')
+        ? throw StateError('$expression is not a valid aritmetic expression')
         : tree.evaluate();
   }
 }
@@ -158,11 +223,44 @@ abstract class _AritimeticExpression implements _Expression<int> {
   _Expression<int> right;
 }
 
-class _SumExpression extends _AritimeticExpression {
-  _SumExpression(super.left, super.right);
+class _AdditionExpression extends _AritimeticExpression {
+  _AdditionExpression(super.left, super.right);
 
   @override
   int evaluate() => left.evaluate() + right.evaluate();
+
+  @override
+  String toString() => '+';
+}
+
+class _SubtractionExpression extends _AritimeticExpression {
+  _SubtractionExpression(super.left, super.right);
+
+  @override
+  int evaluate() => left.evaluate() - right.evaluate();
+
+  @override
+  String toString() => '-';
+}
+
+class _MultiplicationExpression extends _AritimeticExpression {
+  _MultiplicationExpression(super.left, super.right);
+
+  @override
+  int evaluate() => left.evaluate() * right.evaluate();
+
+  @override
+  String toString() => '*';
+}
+
+class _DivisionExpression extends _AritimeticExpression {
+  _DivisionExpression(super.left, super.right);
+
+  @override
+  int evaluate() => left.evaluate() ~/ right.evaluate();
+
+  @override
+  String toString() => '/';
 }
 
 class _NumericExpression extends _Expression<int> {
@@ -172,6 +270,11 @@ class _NumericExpression extends _Expression<int> {
 
   @override
   int evaluate() => value;
+
+  @override
+  String toString() {
+    return value.toString();
+  }
 }
 
 abstract class _Token<T> {
@@ -209,3 +312,21 @@ class _OperatorToken extends _Token<String> {
 
   int get precedence => _precedence[value]!;
 }
+
+/*
+  TODO:
+    - Adicionar github actions
+    - Adiconar mais testes
+    - Tratar sinal de menos
+    - Adicionar ponto flutuante
+    - Adicionar exponenciacao
+    - Adicionar referencias
+    - Adicionar implementacao da main
+    - Atualizar readme com bibliotecas liberadas
+    - Fazer TODO não aparecer no linter
+    - Adicionar infos do setup no readme
+    - Adicionar licença
+    - Adicionar badge de build
+    - Arrumar o xcode
+    - Melhorias gerais, tipo enum para precedence
+ */

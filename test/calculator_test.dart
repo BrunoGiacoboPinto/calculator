@@ -21,7 +21,9 @@ void main() {
       expect(() => calculator.compute('((2+2)'), throwsStateError);
       expect(() => calculator.compute('1+1)'), throwsStateError);
       expect(() => calculator.compute('(1+1'), throwsStateError);
+      expect(() => calculator.compute('()'), throwsStateError);
       expect(() => calculator.compute(')'), throwsStateError);
+      expect(() => calculator.compute('('), throwsStateError);
       expect(() => calculator.compute('('), throwsStateError);
       expect(calculator.compute('(((3+3)))'), 6);
     });

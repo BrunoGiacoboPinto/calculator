@@ -5,21 +5,24 @@ void main() {
   group('Calculator', () {
     final calculator = Calculator();
     test('should not allow invalid characters as input', () {
+      expect(() => calculator.compute('🎉🎉🎉🎉🎉'), throwsArgumentError);
+      expect(() => calculator.compute('..'), throwsFormatException);
       expect(() => calculator.compute('\t\n23'), throwsArgumentError);
       expect(() => calculator.compute('@ + 10'), throwsArgumentError);
       expect(() => calculator.compute('abcd'), throwsArgumentError);
+      expect(() => calculator.compute('.'), throwsFormatException);
       expect(() => calculator.compute(' '), throwsArgumentError);
-      expect(() => calculator.compute('.'), throwsArgumentError);
       expect(() => calculator.compute(''), throwsArgumentError);
+      expect(calculator.compute('10'), 10);
     });
 
     test('should handle balanced parentesis', () {
       expect(() => calculator.compute('((1+2) + 1'), throwsStateError);
+      expect(() => calculator.compute('((2+2)'), throwsStateError);
       expect(() => calculator.compute('1+1)'), throwsStateError);
       expect(() => calculator.compute('(1+1'), throwsStateError);
       expect(() => calculator.compute(')'), throwsStateError);
       expect(() => calculator.compute('('), throwsStateError);
-      expect(() => calculator.compute('((2+2)'), throwsStateError);
       expect(calculator.compute('(((3+3)))'), 6);
     });
 
@@ -33,10 +36,9 @@ void main() {
     test('should compute complex expression', () {
       expect(calculator.compute('4 + 4 * 2 /(1-5)'), 2);
       expect(calculator.compute('10 + 10 + 10 + 10 + 10'), 50);
-      //expect(calculator.compute('4 * 2 / ( 1 - 5 )'), 4);
-      //expect(calculator.compute('4 * (2-1)'), 4);
-      //expect(calculator.compute('2+(1-2)'), 1);
-      //expect(calculator.compute('2+(1-2)'), 1);
+      expect(calculator.compute('4 * 2 / ( 1 - 5 )'), -2);
+      expect(calculator.compute('4 * (2-1)'), 4);
+      expect(calculator.compute('2+(1-2)'), 1);
     });
   });
 }

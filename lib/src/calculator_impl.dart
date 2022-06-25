@@ -166,7 +166,7 @@ class _CalculatorImpl extends Calculator {
       final operator = operators.removeLast();
       late _Expression<int> left, right;
 
-      if (operators.length.isEven) {
+      if (operators.length.isEven && numbers.isNotEmpty) {
         if (numbers.length > 1) {
           right = numbers.removeLast();
           left = numbers.removeLast();
@@ -191,7 +191,7 @@ class _CalculatorImpl extends Calculator {
 
     print(shuntingYard);
 
-    return tree.removeLast();
+    return tree.isEmpty ? numbers.last : tree.last;
   }
 
   @override
@@ -325,7 +325,6 @@ class _OperatorToken extends _Token<String> {
     - Atualizar readme com bibliotecas liberadas
     - Fazer TODO não aparecer no linter
     - Adicionar infos do setup no readme
-    - Adicionar licença
     - Adicionar badge de build
     - Arrumar o xcode
     - Melhorias gerais, tipo enum para precedence
